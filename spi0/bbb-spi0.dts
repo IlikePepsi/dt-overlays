@@ -4,6 +4,7 @@
 /plugin/;
 
 /{
+	model = "TI AM335x BeagleBone Black";
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
 	part-number = "BBB-SPI0";
 	version = "00A0";
@@ -14,15 +15,27 @@
 		__overlay__ {
 			spi0_pins: pinmux_spi0_pins {
 				pinctrl-single,pins = <
-					0x150 0x30 /* spi0_sclk	INPUT_PULLUP | MODE0 */
-					0x154 0x30 /* spi0_d0	INPUT_PULLUP | MODE0 */
-					0x044 0x30 /* gpmc_a1	INPUT_PULLUP | MODE0 */
+					0x150 0x30 /* P9_22 spi0_sclk	INPUT_PULLUP | MODE0 */
+					0x154 0x30 /* P9_21 spi0_d0	INPUT_PULLUP | MODE0 */
+					0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
 				>;
 			};
 		};
 	};
 
 	fragment@1 {
+		target = <&am33xx_pinmux>;
+
+		__overlay__ {
+			gpio_trig: pinmux_gpio_trig {
+				pinctrl-single,pins = <
+					0x184 0x37 /* P9_24 gpio0_15	INPUT_PULLUP | MODE7 */
+				>;
+			};
+		};
+	};
+
+	fragment@2 {
 		target = <&spi0>;
 
 		__overlay__ {
@@ -30,12 +43,38 @@
 			pinctrl-0 = <&spi0_pins>;
 			status = "okay";
 
-			cs-gpios = <&am33xx_pinmux 0x044 0> <0>;
+			/* additional cs channel on unused pin (GPIO bank 1, pin 17) */
+			cs-gpios = <&gpio2 17 0>;
 
 			spidev_adc@0 {
-				spi-max-speed = 24000000;
+				spi-max-frequency = <24000000>;
 				reg = <0>;
 				compatible = "spidev";
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&ocp>;
+
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			gpio_trig {
+				compatible = "gpio-keys";
+				pinctrl-names = "default";
+				pinctrl-0 = <&gpio_trig>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				adc_int {
+					label = "ADC-interrupt-pin";
+					debounce-interval = <0>;
+					linux,code = <1>;
+					gpios = <&gpio2 17 0X5>;
+					gpio-key,wakeup;
+				};
 			};
 		};
 	};

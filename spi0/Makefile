@@ -1,9 +1,14 @@
+CC=gcc
+INCLUDE=
 SOURCE = $(wildcard *.dts)
 VERSION = 00A0
 BLOB = $(SOURCE:%.dts=%-$(VERSION).dtbo)
 
 all:
 	dtc -O dtb -o $(BLOB) -b 0 -@ $(SOURCE)
+
+test:
+
 
 install:
 	cp $(BLOB) /lib/firmware
