@@ -1,0 +1,46 @@
+// Custom device tree overlay to enable spi0 with suitable pin configuration
+
+/dts-v1/;
+/plugin/;
+
+/{
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+	part-number = "BBB-SPI0";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+
+		__overlay__ {
+			spi0_pins: pinmux_spi0_pins {
+				pinctrl-single,pins = <
+					0x150 0x30 /* spi0_sclk	INPUT_PULLUP | MODE0 */
+					0x154 0x30 /* spi0_d0	INPUT_PULLUP | MODE0 */
+				>;
+			};
+			spi0_pins_cs: pinmux_spi0_pins_cs {
+				pinctrl-single,pins = <
+					0x044 0x30 /* gpmc_a1	INPUT_PULLUP | MODE0 */
+				>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&spi0>;
+
+		__overlay__ {
+			pinctrl-names = "default";
+			pinctrl-0 = <&spi0_pins>;
+			status = "okay";
+
+			cs-gpios = <&spio0_pins_cs 0 0> <0>;
+
+			spidev_adc@0 {
+				spi-max-speed = 24000000;
+				reg = <0>;
+				compatible = "spidev";
+			};
+		};
+	};
+};
