@@ -16,10 +16,6 @@
 				pinctrl-single,pins = <
 					0x150 0x30 /* spi0_sclk	INPUT_PULLUP | MODE0 */
 					0x154 0x30 /* spi0_d0	INPUT_PULLUP | MODE0 */
-				>;
-			};
-			spi0_pins_cs: pinmux_spi0_pins_cs {
-				pinctrl-single,pins = <
 					0x044 0x30 /* gpmc_a1	INPUT_PULLUP | MODE0 */
 				>;
 			};
@@ -34,7 +30,7 @@
 			pinctrl-0 = <&spi0_pins>;
 			status = "okay";
 
-			cs-gpios = <&spio0_pins_cs 0 0> <0>;
+			cs-gpios = <&am33xx_pinmux 0x044 0> <0>;
 
 			spidev_adc@0 {
 				spi-max-speed = 24000000;
