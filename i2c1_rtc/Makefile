@@ -1,4 +1,5 @@
 SOURCE = $(wildcard *.dts)
+RULES = $(wildcard *.rules)
 VERSION = 00A0
 BLOB = $(SOURCE:%.dts=%-$(VERSION).dtbo)
 
@@ -7,6 +8,10 @@ all:
 
 install:
 	cp $(BLOB) /lib/firmware
+
+# probably root permissions needed for this
+udev_rules:
+	cp $(RULES) /etc/udev/rules.d 
 
 clean:
 	rm -f ./$(BLOB)
