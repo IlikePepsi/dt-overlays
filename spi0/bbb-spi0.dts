@@ -20,22 +20,17 @@
 					0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
 				>;
 			};
-		};
-	};
 
-	fragment@1 {
-		target = <&am33xx_pinmux>;
-
-		__overlay__ {
-			gpio_trig: pinmux_gpio_trig {
+			gpio_keys: pinmux_gpio_keys {
 				pinctrl-single,pins = <
+					0x040 0x37 /* P9_15 gpio1_16 	INPUT_PULLUP | MODE7 */
 					0x184 0x37 /* P9_24 gpio0_15	INPUT_PULLUP | MODE7 */
 				>;
 			};
 		};
 	};
 
-	fragment@2 {
+	fragment@1 {
 		target = <&spi0>;
 
 		__overlay__ {
@@ -44,7 +39,7 @@
 			status = "okay";
 
 			/* additional cs channel on unused pin (GPIO bank 1, pin 17) */
-			cs-gpios = <&gpio2 17 0>;
+			//cs-gpios = <&gpio2 17 0>;
 
 			spidev_adc@0 {
 				spi-max-frequency = <24000000>;
@@ -54,26 +49,36 @@
 		};
 	};
 
-	fragment@3 {
+	fragment@2 {
 		target = <&ocp>;
 
 		__overlay__ {
 			#address-cells = <1>;
 			#size-cells = <1>;
 
-			gpio_trig {
+			gpio_keys {
 				compatible = "gpio-keys";
 				pinctrl-names = "default";
-				pinctrl-0 = <&gpio_trig>;
+				pinctrl-0 = <&gpio_keys>;
 				#address-cells = <1>;
 				#size-cells = <0>;
 
-				adc_int {
-					label = "ADC-interrupt-pin";
-					debounce-interval = <0>;
-					linux,code = <1>;
-					gpios = <&gpio2 17 0X5>;
+				intput_P9_24 {
+					label = "input_P9_24";
+					debounce-interval = <50>;
+					linux,code = <24>;
+					gpios = <&gpio1 15 0X1>;
 					gpio-key,wakeup;
+					autorepeat;
+				};
+
+				input_P9_15 {
+					label = "input_P9_15";
+					debounce-interval = <50>;
+					linux,code = <15>;
+					gpios = <&gpio2 16 0x1>;
+					gpio-key,wakeup;
+					autorepeat;
 				};
 			};
 		};
