@@ -25,7 +25,9 @@
 		target = <&i2c1>;
 
 		__overlay__ {
-			// pinctrl-names ="default";
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			pinctrl-names ="default";
 			pinctrl-0 = <&i2c1_pins>;
 
 			status = "okay";
