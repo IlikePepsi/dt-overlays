@@ -17,7 +17,7 @@
 				pinctrl-single,pins = <
 					0x150 0x30 /* P9_22 spi0_sclk	INPUT_PULLUP | MODE0 */
 					0x154 0x30 /* P9_21 spi0_d0	INPUT_PULLUP | MODE0 */
-					0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
+					/* 0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
 				>;
 			};
 
@@ -34,6 +34,8 @@
 		target = <&spi0>;
 
 		__overlay__ {
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
 			pinctrl-names = "default";
 			pinctrl-0 = <&spi0_pins>;
 			status = "okay";
@@ -42,9 +44,12 @@
 			//cs-gpios = <&gpio2 17 0>;
 
 			spidev_adc@0 {
+				#address-cells = <0x1>;
+				#size-celss = <0x0>;
+				modalias = "simple_spi";
 				spi-max-frequency = <24000000>;
 				reg = <0>;
-				compatible = "spidev";
+				compatible = "simple,simple-spi";
 			};
 		};
 	};
