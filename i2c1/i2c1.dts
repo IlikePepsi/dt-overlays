@@ -39,6 +39,13 @@
 				compatible = "dallas,ds1307";
 				reg = <0x68>;
 			};
+
+			wiichuck: wiichuck@52 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				compatible = "custom,wiichuck";
+				reg = <0x52>;
+			};
 		};
 	};
 };
