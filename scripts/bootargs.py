@@ -18,6 +18,29 @@ parser.add_argument("--add", help = "add a new key/value parameter")
 args = parser.parse_args()
 
 
+def parse_recurse(line):
+    if '=' in line:
+        d = {}
+        keys = line.split("=", 1)
+        if len(keys) < 2:
+            d[keys[0].strip()] = None
+            return d
+        else:
+            d[keys[0].strip()] = parse_recurse(keys[1])
+    else:
+        line = line.strip()
+        return line.split(',')
+
+
+def deserialize_recurse(filename):
+    with open(args.file, mode='r') as f:
+        d = {}
+        for line in f.readlines():
+            d = parse_recurse(line)
+
+    return d
+
+
 def deserialize(filename):
     with open(args.file, mode='r') as f:
         d = {}
@@ -35,7 +58,8 @@ def serialize(d):
     for key, value in d.items():
         result.append(key + " = " + value + "\n")
 
-    with open(args.file, mode='w') as f:
+    #with open(args.file, mode='w') as f:
+    with open("test.txt", mode='w') as f:
         result.sort()
         f.writelines(result)
 
@@ -43,7 +67,7 @@ def serialize(d):
 def main():
     maintain_default = True
 
-    d = deserialize(args.file)
+    d = deserialize_recurse(args.file)
 
     if args.select:
         maintain_default = False
