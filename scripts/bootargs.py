@@ -3,6 +3,7 @@ __author__ = "archuser"
 
 import argparse
 import sys
+import os
 
 from pprint import pprint as pp
 
@@ -11,37 +12,57 @@ parser.add_argument("file", help = "file to operate on")
 parser.add_argument("--select", help = "show a keys associated value string (if present)")
 parser.add_argument("--append", help = "append input string to value of selected key")
 parser.add_argument("--remove", help = "remove input string from value of selected key")
-parser.add_argument("--add", help = "add a new key/value parameter")
-
-#parser.add_argument("key", help = "the key whose value you want to modify")
 
 args = parser.parse_args()
 
 
-def parse_recurse(line):
-    if '=' in line:
-        d = {}
-        keys = line.split("=", 1)
-        if len(keys) < 2:
-            d[keys[0].strip()] = None
-            return d
+def parse_recursive(line):
+    l = []
+    # Assuming 'line' contains whitespace separated values we split'em up
+    for arg in line.split():
+        # Are there still assignments in 'value'?
+        if '=' in arg:
+            # Yes there are
+            # Split 'arg' at the assignment operators position
+            keys = arg.split("=", 1)
+            # Does the resulting list contain at least 2 elements?
+            if len(keys) < 2:
+                # No it doesn't, so append key[0] with an empty value list
+                l.append([keys[0].strip(), []])
+                continue
+            else:
+                # Yes it does, so append a key[0] and parse key[1] for further assignments
+                l.append([keys[0].strip(), parse_recursive(keys[1])])
+                continue
         else:
-            d[keys[0].strip()] = parse_recurse(keys[1])
-    else:
-        line = line.strip()
-        return line.split(',')
+            # No there are not. So we assume there are only comma separated values left in 'value'
+            value = arg.strip()
+            l.append(value.split(','))
+            continue
+
+    return l
 
 
-def deserialize_recurse(filename):
+def deserialize_recursive(filename):
     with open(args.file, mode='r') as f:
-        d = {}
+        l = []
+        # Read all lines in given file and create list of lists (of lists) for each line
         for line in f.readlines():
-            d = parse_recurse(line)
+            if '=' in line:
+                rootkey = line.split('=',1)
+                if len(rootkey) < 2:
+                    l.append([rootkey[0].strip(), []])
+                else:
+                    l.append([rootkey[0].strip(), parse_recursive(rootkey[1])])
 
-    return d
+        # Make dictionary from List
+
+    return l
 
 
 def deserialize(filename):
+    if not os.path.exists(filename):
+        return {}
     with open(args.file, mode='r') as f:
         d = {}
         for line in f.readlines():
@@ -58,8 +79,7 @@ def serialize(d):
     for key, value in d.items():
         result.append(key + " = " + value + "\n")
 
-    #with open(args.file, mode='w') as f:
-    with open("test.txt", mode='w') as f:
+    with open(args.file, mode='w') as f:
         result.sort()
         f.writelines(result)
 
@@ -67,25 +87,28 @@ def serialize(d):
 def main():
     maintain_default = True
 
-    d = deserialize_recurse(args.file)
+    d = dict(deserialize_recursive(args.file))
 
     if args.select:
         maintain_default = False
 
+        args.select = args.select.split(',')
+
         if args.append:
-            d[args.select] = d[args.select] + " " + args.append.strip()
+            d[args.select[0]] = d[args.select] + " " + args.append.strip()
 
         if args.remove:
             d[args.select] = d[args.select].replace(args.remove, "").strip()
 
-        if args.select in d:
-            print("{0} = {1}".format(args.select, d.get(args.select)))
+        if args.select[0] in d:
+            pp(d[args.select[0]])
+            return
         else:
-            sys.exit("key '{0}' not found in {1}".format(args.show, args.file))
+            sys.exit("key '{0}' not found in {1}".format(args.select[0], args.file))
             return
 
-    elif args.add:
-        result = args.add.split("=", 1)
+    elif args.append:
+        result = args.append.split("=", 1)
         d[result[0]] = result[1]
 
     elif args.remove:
