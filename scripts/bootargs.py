@@ -17,6 +17,11 @@ args = parser.parse_args()
 
 
 def parse_recursive(line):
+    """
+    This method parses lines of text recursively to return nested lists of the lines content, assuming the text sticks to a specific pattern
+    :param line: the input text
+    :return: list
+    """
     l = []
     # Assuming 'line' contains whitespace separated values we split'em up
     for arg in line.split():
@@ -37,13 +42,25 @@ def parse_recursive(line):
         else:
             # No there are not. So we assume there are only comma separated values left in 'value'
             value = arg.strip()
-            l.append(value.split(','))
+            value = value.split(',')
+            for v in value:
+                l.append(v)
             continue
 
     return l
 
 
 def deserialize_recursive(filename):
+    """ A function to deserialize files containing text recursively
+
+    This method assumes a specific assignment pattern within the file given by ``filename``.
+    The pattern reads as follows:
+        "Rootkey = value1 value2 child_key1=value3,value4 value5.."
+    Text sticking to this pattern will be parsed by ``parse_recursive()`` to generate nested lists as follows:
+        [['Rootkey', [['value1'], ['value2'], ['child_key1', ['value3', 'value4']], ['value5'].. ]]]
+    :param filename: name of the file to read
+    :return: list
+    """
     with open(args.file, mode='r') as f:
         l = []
         # Read all lines in given file and create list of lists (of lists) for each line
@@ -54,8 +71,6 @@ def deserialize_recursive(filename):
                     l.append([rootkey[0].strip(), []])
                 else:
                     l.append([rootkey[0].strip(), parse_recursive(rootkey[1])])
-
-        # Make dictionary from List
 
     return l
 
@@ -84,20 +99,61 @@ def serialize(d):
         f.writelines(result)
 
 
-def main():
-    maintain_default = True
+def is_list(o):
+    return isinstance(o, list)
 
+
+def is_dict(o):
+    return isinstance(o, dict)
+
+
+def list_to_dict(l):
+    if len(l) is 2:
+        return {l[0]: l[1]}
+    else:
+        return l
+
+
+def deep_transform(l):
+        d = {}
+        for e in l:
+            if is_list(e) and len(e) is 2:
+                d[e[0]] = deep_transform(e[1])
+                return d
+            else:
+                return [e]
+
+
+def main():
+
+    default = True
+
+    # Convert the lists of lists object to a dict
     d = dict(deserialize_recursive(args.file))
 
-    if args.select:
-        maintain_default = False
+    for key in d.keys():
+        d[key] = [list_to_dict(e) for e in d[key]]
 
+    if args.select:
+        default = False
         args.select = args.select.split(',')
 
+
+        if len(args.select) > 1:
+            if args.select[0] in d:
+                for e in d[args.select[0]]:
+                    if args.select[1] in e:
+                        v = d[args.select[0][args.select[1]]]
+        # TODO: Implement select behavior if list is passed
+
         if args.append:
-            d[args.select[0]] = d[args.select] + " " + args.append.strip()
+            l = parse_recursive(args.append)
+            for e in l:
+                d[args.select[0]].append(list_to_dict(e))
 
         if args.remove:
+            l = parse_recursive(args.append)
+
             d[args.select] = d[args.select].replace(args.remove, "").strip()
 
         if args.select[0] in d:
@@ -108,8 +164,10 @@ def main():
             return
 
     elif args.append:
-        result = args.append.split("=", 1)
-        d[result[0]] = result[1]
+        l = parse_recursive(args.append)
+        v = deep_transform(l)
+        d[v.keys()[0]] = v.keys()[0]
+        pass
 
     elif args.remove:
         d.pop(args.remove)
@@ -119,7 +177,7 @@ def main():
         pp(d)
         return
 
-    serialize(d)
+    # serialize(d)
 
 if __name__ == '__main__':
     main()
