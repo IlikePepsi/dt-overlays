@@ -26,12 +26,27 @@ def serialize(result):
         result.sort()
         f.writelines(result)
 
-def assemble_string(l, d):
+
+def assemble_string(l, d, s):
     ret = ""
+    if s:
+        l.sort()
     for t in l:
         if t is not '':
             ret = ret + t + d
     return ret.rstrip(d)
+
+
+def list_append(l, a):
+    for arg in a.split(','):
+        if arg not in l:
+            l.append(arg)
+
+
+def list_remove(l, r):
+    for arg in r.split(','):
+        if arg in l:
+            l.remove(arg)
 
 
 def main():
@@ -40,6 +55,7 @@ def main():
     lcount = 0
     default = True
 
+    # Select rootkey or a subkey for further operation
     if args.select:
         for line in lines:
             # Get all whitespace separated words within the current line
@@ -48,39 +64,43 @@ def main():
             indices = [i for i, s in enumerate(words) if args.select in s]
             # If at least one matching index was found
             if len(indices) > 0:
-                # We want to append/remove values to/from the rootkey
-                if 0 in indices: # The rootkey was selected
+                # We selected the rootkey and may append or remove values
+                if 0 in indices:
+                    # We want to append args.append if it is not present
                     if args.append:
-                        if args.append.strip() not in words:
-                            words.append(args.append.strip())
-
+                        list_append(words, args.append)
+                    # We want to remove args.remove if it is present
                     if args.remove:
-                        if args.remove.strip() in words:
-                            words.remove(args.remove.strip())
+                        list_remove(words, args.remove)
+                # We selected a subkey and may append or remove values
                 else:
-                    # Look for assignment operator (indicating a list on right side of assignment)
+                    # Iterate over matched indices
                     for i in indices:
-                        # Obtain key and value(s) by splitting
+                        # Index contains assignment -> We found a subkey
                         values = words[i].split('=', 1)
                         # Split value string at the given separator
-                        tmp = values[1].split(',')
-                        # Append to the list of values
+                        if values[1] is not '':
+                            tmp = values[1].split(',')
+                        else:
+                            tmp = []
+                        # Append to the list of values if args.append is not in it
                         if args.append:
-                            if args.append not in tmp:
-                                tmp.append(args.append)
+                            list_append(tmp, args.append)
                             # Reassemble the value string
-                            values[1] = assemble_string(tmp, ',')
-                        # Remove from the list of values
+                            values[1] = assemble_string(tmp, ',', True)
+                        # Remove from the list of values if args.append is in it
                         if args.remove:
-                            if args.remove in tmp:
-                                tmp.remove(args.remove)
+                            list_remove(tmp, args.remove)
                             # Reassemble the value string
-                            values[1] = assemble_string(tmp, ',')
+                            values[1] = assemble_string(tmp, ',', True)
                         # Assign new string to list element
                         words[i] = values[0] + '=' + values[1]
+                slist = words[words.index('=') + 1:]
+                slist.sort()
+                ret = words[0:words.index('=') + 1] + slist
                 i = lines.index(line)
                 # Assemble the whole line from all elements in 'words'
-                lines[i] = assemble_string(words, ' ') + '\n'
+                lines[i] = assemble_string(ret, ' ', False) + '\n'
                 print(lines[i])
                 default = False
             else:
