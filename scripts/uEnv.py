@@ -67,12 +67,12 @@ def main():
                 lcount = lcount + 1
                 continue
             # Get all whitespace separated words within the current line
-            words = line.split('=', 1)
-            tmp = []
-            tmp.append(words[0].strip())
-            words = tmp + words[1].split()
+            tmp = line.split('=', 1)
+            words = []
+            words.append(tmp[0].strip())
+            words = words + [w.strip('= ') for w in tmp[1].split()]
             # Enumerate the words and find indices matching the pattern given by 'args.select'
-            indices = [i for i, s in enumerate(words) if args.select in s]
+            indices = [i for i, s in enumerate(words) if s.find(args.select) is not -1]
             # If at least one matching index was found
             if len(indices) > 0:
                 # We selected the rootkey and may append or remove values
@@ -88,29 +88,29 @@ def main():
                     # Iterate over matched indices
                     for i in indices:
                         # The outcome of this statement may vary
-                        values = words[i].split('=', 1)
+                        subkey = words[i].split('=', 1)
                         # There were no values assigned before so we create an empty value list
-                        if len(values) is 1:
-                            values.append('')
+                        if len(subkey) is 1:
+                            subkey.append('')
                             tmp = []
                         # We already have some values and must handle different cases
                         else:
-                            if len(values) is 2:
-                                tmp = values[1].split(',')
+                            if len(subkey) is 2:
+                                tmp = subkey[1].split(',')
                             if tmp[0] is '': # Happens when the subkey in line is 'subkey='
                                 tmp = []
                         # Append to the list of values if args.append is not in it
                         if args.append:
                             list_append(tmp, args.append)
                             # Reassemble the value string
-                            values[1] = assemble_string(tmp, ',', True)
+                            subkey[1] = assemble_string(tmp, ',', True)
                         # Remove from the list of values if args.append is in it
                         if args.remove:
                             list_remove(tmp, args.remove)
                             # Reassemble the value string
-                            values[1] = assemble_string(tmp, ',', True)
+                            subkey[1] = assemble_string(tmp, ',', True)
                         # Assign new string to list element
-                        words[i] = values[0] + '=' + values[1]
+                        words[i] = subkey[0] + '=' + subkey[1]
                 slist = words[1:]
                 slist.sort()
                 ret = words[0:1] + ['='] + slist
