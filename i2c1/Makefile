@@ -3,6 +3,8 @@ VERSION = 00A0
 RULES = $(SOURCE:%.dts=99-%.rules)
 BLOB = $(SOURCE:%.dts=%-$(VERSION).dtbo)
 NAME = $(SOURCE:%.dts=%)
+UENV.TXT = /boot/uEnv.txt
+UENV.PY = ../scripts/uEnv.py
 
 build: $(SOURCE)
 	dtc -O dtb -o $(BLOB) -b 0 -@ $(SOURCE)
@@ -10,12 +12,18 @@ build: $(SOURCE)
 install: build
 	sudo cp $(BLOB) /lib/firmware
 	sudo cp $(RULES) /etc/udev/rules.d
-	sudo python ../scripts/bootargs.py /boot/uEnv.txt --select Optargs --append capemgr.enable_partno=$(NAME)
+	if ! [ -x $(UENV.PY) ] ; then \
+		chmod a+x $(UENV.PY) ;
+	sudo $(UENV.PY) $(UENV.TXT) --select capemgr.enable_partno --append $(NAME)
 
 uninstall:
-	sudo rm -fv /lib/firmware/$(BLOB)
-	sudo rm -fv /etc/udev/rules.d/$(RULES)
-	sudo python ../scripts/bootargs.py /boot/uEnv.txt --select Optargs --remove capemgr.enable_partno=$(NAME)
+	if ! [ -e /lib/firmware/$(BLOB) ] ; then \
+		sudo rm -fv /lib/firmware/$(BLOB) ;
+	if ! [ -e /etc/udev/rules.d/$(RULES) ] ; then \
+		sudo rm -fv /etc/udev/rules.d/$(RULES) ;
+	if ! [ -x $(UENV.PY) ] ; then \
+		chmod a+x $(UENV.PY) ;
+	sudo $(UENV.PY) $(UENV.TXT) --select capemgr.enable_partno --remove $(NAME)
 
 clean:
 	sudo rm -fv ./$(BLOB)
