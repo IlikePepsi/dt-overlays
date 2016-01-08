@@ -117,7 +117,7 @@ def main():
                 i = lines.index(line)
                 # Assemble the whole line from all elements in 'words'
                 lines[i] = assemble_string(ret, ' ', False) + '\n'
-                print(lines[i])
+                print(lines[i].strip())
                 default = False
             else:
                 lcount = lcount + 1
