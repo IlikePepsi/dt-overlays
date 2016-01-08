@@ -67,10 +67,10 @@ def main():
                 lcount = lcount + 1
                 continue
             # Get all whitespace separated words within the current line
-            words = line.split('=', 1)
-            tmp = []
-            tmp.append(words[0].strip())
-            words = tmp + words[1].split()
+            tmp = line.split('=', 1)
+            words = []
+            words.append(tmp[0].strip())
+            words = words + [w.strip('= ') for w in tmp[1].split()]
             # Enumerate the words and find indices matching the pattern given by 'args.select'
             indices = [i for i, s in enumerate(words) if args.select in s]
             # If at least one matching index was found
