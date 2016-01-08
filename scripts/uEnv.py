@@ -23,6 +23,10 @@ def deserialize(filename):
 
 def serialize(result):
     with open(args.file, mode='w') as f:
+        try:
+            result.remove('\n')
+        except ValueError:
+            pass
         result.sort()
         f.writelines(result)
 
@@ -58,8 +62,15 @@ def main():
     # Select rootkey or a subkey for further operation
     if args.select:
         for line in lines:
+            # Handle empty lines
+            if line == '\n':
+                lcount = lcount + 1
+                continue
             # Get all whitespace separated words within the current line
-            words = line.split()
+            words = line.split('=', 1)
+            tmp = []
+            tmp.append(words[0].strip())
+            words = tmp + words[1].split()
             # Enumerate the words and find indices matching the pattern given by 'args.select'
             indices = [i for i, s in enumerate(words) if args.select in s]
             # If at least one matching index was found
@@ -76,13 +87,18 @@ def main():
                 else:
                     # Iterate over matched indices
                     for i in indices:
-                        # Index contains assignment -> We found a subkey
+                        # The outcome of this statement may vary
                         values = words[i].split('=', 1)
-                        # Split value string at the given separator
-                        if values[1] is not '':
-                            tmp = values[1].split(',')
-                        else:
+                        # There were no values assigned before so we create an empty value list
+                        if len(values) is 1:
+                            values.append('')
                             tmp = []
+                        # We already have some values and must handle different cases
+                        else:
+                            if len(values) is 2:
+                                tmp = values[1].split(',')
+                            if tmp[0] is '': # Happens when the subkey in line is 'subkey='
+                                tmp = []
                         # Append to the list of values if args.append is not in it
                         if args.append:
                             list_append(tmp, args.append)
@@ -95,9 +111,9 @@ def main():
                             values[1] = assemble_string(tmp, ',', True)
                         # Assign new string to list element
                         words[i] = values[0] + '=' + values[1]
-                slist = words[words.index('=') + 1:]
+                slist = words[1:]
                 slist.sort()
-                ret = words[0:words.index('=') + 1] + slist
+                ret = words[0:1] + ['='] + slist
                 i = lines.index(line)
                 # Assemble the whole line from all elements in 'words'
                 lines[i] = assemble_string(ret, ' ', False) + '\n'
@@ -110,7 +126,7 @@ def main():
             sys.exit("key '{0}' not found in {1}".format(args.select, args.file))
             return
 
-    if args.append:
+    if args.append and default:
         doublet = False
         for line in lines:
             if args.append in line:
@@ -118,7 +134,7 @@ def main():
         if not doublet:
             lines.append(args.append)
 
-    if args.remove:
+    if args.remove and default:
         for line in lines:
             if args.remove in line:
                 lines.remove(line)
