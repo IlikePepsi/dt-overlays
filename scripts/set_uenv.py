@@ -17,12 +17,12 @@ args = parser.parse_args()
 def deserialize(filename):
     if not os.path.exists(filename):
         return []
-    with open(args.file, mode='r') as f:
+    with open(filename, mode='r') as f:
         return f.readlines()
 
 
-def serialize(result):
-    with open(args.file, mode='w') as f:
+def serialize(filename, result):
+    with open(filename, mode='w') as f:
         try:
             result.remove('\n')
         except ValueError:
@@ -148,7 +148,7 @@ def main():
             if args.remove in line:
                 lines.remove(line)
 
-    serialize(lines)
+    serialize(args.file, lines)
 
     if default:
         for line in lines:
