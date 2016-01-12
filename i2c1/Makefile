@@ -3,50 +3,82 @@ RULES = $(SOURCE:%.dts=99-%.rules)
 NAME ?= $(SOURCE:%.dts=%)
 BLOB = $(NAME)-$(VERSION).dtbo
 VERSION = 00A0
+KEY ?= bone_capemgr.enable_partno
 UENV = /boot/uEnv.txt
 SET_UENV = ../scripts/set_uenv.py
 RM_SLOTS = ../scripts/remove_slots.py
 SLOTS ?= /sys/devices/platform/bone_capemgr/slots
 
+
+define set_permission =
+@if ! [[ -e $(1) ]] ; then 			\
+	echo "File not found : $(1)" ;		\
+elif ! [[ -x $(1) ]] ; then 			\
+	sudo chmod a+x $(1) ; 			\
+fi
+endef
+
+
+define get_slotnumber =
+-$(shell $(RM_SLOTS) $(SLOTS) $(NAME) --slot true 2>/dev/null)
+endef
+
+
+define test_slot =
+$(RM_SLOTS) $(SLOTS) $(NAME) &>/dev/null
+endef
+
+
 build: $(SOURCE)
+	@echo
+	@echo "Building.."
+	@echo "    ..overlay.."
 	dtc -O dtb -o $(BLOB) -b 0 -@ $(SOURCE)
+	@echo
+
 
 install: build
-	sudo cp $(BLOB) /lib/firmware
-	sudo cp $(RULES) /etc/udev/rules.d
-	@if ! [[ -x $(SET_UENV) ]] ; then \
-		sudo chmod a+x $(SET_UENV) ;\
+	@echo "Installing.."
+	@echo "    ..install overlay binary.."
+	@sudo cp $(BLOB) /lib/firmware
+	@echo "    ..install udev rules.."
+	@sudo cp $(RULES) /etc/udev/rules.d
+	$(call set_permission, $(SET_UENV))
+	@if [[ "$($(SET_UENV) $(UENV) --select $(KEY) 1>/dev/null)" != 0 ]] ; then \
+		$(SET_UENV) $(UENV) --select optargs --append $(KEY) &>/dev/null ; \
 	fi
-	@if [[ "$($(SET_UENV) $(UENV) --select capemgr.enable_partno 1>/dev/null)" != 0 ]] ; then \
-		$(SET_UENV) $(UENV) --select optargs --append capemgr.enable_partno 1>/dev/null ; \
+	@echo "    ..set boot parameter.."
+	@sudo $(SET_UENV) $(UENV) --select $(KEY) --append $(NAME) &>/dev/null
+	@echo "    ..assign overlay slot.."
+	@$(call test_slot) ; if [ $$? != 0 ] ; then 	\
+		echo $(NAME) > $(SLOTS) ;		\
 	fi
-	@sudo $(SET_UENV) $(UENV) --select capemgr.enable_partno --append $(NAME)
-	@echo $(NAME) > $(SLOTS)
-	make clean
+	@echo "Cleaning build directory.."
+	@$(MAKE) clean
+	@echo "    ..done!"
+
 
 uninstall:
-	@if ! [[ -x $(RM_SLOTS) ]] ; then \
-		sudo chmod a+x $(RM_SLOTS) ;\
+	@echo "Uninstalling.."
+	@echo "    ..free overlay slot.."
+	$(eval SLOT := $(call get_slotnumber))
+	@$(call test_slot) ; if [ $$? == 0 ] ; then 	\
+		echo $(SLOT) > $(SLOTS) ;		\
 	fi
-	@if [[ "$($(RM_SLOTS) $(SLOTS) $(NAME) 1>/dev/null)" == 0 ]] ; then \
-		echo "-$($(RM_SLOTS) $(SLOTS) $(NAME) --slot true)" > $(SLOTS) ; \
+	@echo "    ..uninstall overlay binary.."
+	@if [ -e /lib/firmware/$(BLOB) ] ; then 	\
+		sudo rm -fv /lib/firmware/$(BLOB) ;	\
 	fi
-	@if ! [ -e /lib/firmware/$(BLOB) ] ; then \
-		sudo rm -fv /lib/firmware/$(BLOB) ;\
-	fi
-	@if ! [ -e /etc/udev/rules.d/$(RULES) ] ; then \
+	@echo "    ..uninstall udev rules.."
+	@if [ -e /etc/udev/rules.d/$(RULES) ] ; then 	\
 		sudo rm -fv /etc/udev/rules.d/$(RULES) ;\
 	fi
-	@if ! [ -x $(SET_UENV) ] ; then \
-		sudo chmod a+x $(SET_UENV) ;\
-	fi
-	@sudo $(SET_UENV) $(UENV) --select capemgr.enable_partno --remove $(NAME)
+	@echo "    ..remove boot parameter.."
+	$(call set_permission, $(SET_UENV))
+	@sudo $(SET_UENV) $(UENV) --select $(KEY) --remove $(NAME) &>/dev/null
+	@echo "    ..done!"
+
+
 clean:
-	sudo rm -fv ./$(BLOB)
-
-test:
-	@if ! [[ -x $(RM_SLOTS) ]] ; then \
-		sudo chmod a+x $(RM_SLOTS) ;\
-	fi
-	echo "$($(RM_SLOTS) $(SLOTS) $(NAME) --slot true)"
-
+	@echo "    ..remove overlay binary.."
+	@sudo rm -fv ./$(BLOB)

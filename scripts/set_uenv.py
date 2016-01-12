@@ -122,10 +122,12 @@ def main():
                         words[i] = words[i].rstrip('= ')
                 slist = words[1:]
                 slist.sort()
-                ret = words[0:1] + ['='] + slist
+                ret = list(words[0:1] + ['='] + slist)
                 i = lines.index(line)
                 # Assemble the whole line from all elements in 'words'
-                lines[i] = assemble_string(ret, ' ', False) + '\n'
+                tmp = assemble_string(ret, ' ', False) + '\n'
+                # Delete whitespace adjacent to first assignment
+                lines[i] = tmp.replace(' ', '', 2)
                 print(lines[i].strip())
                 default = False
             else:

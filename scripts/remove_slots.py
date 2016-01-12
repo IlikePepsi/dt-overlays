@@ -15,7 +15,7 @@ args = parser.parse_args()
 
 def open_file(filename):
     if not os.path.exists(filename):
-        sys.exit("Could not open file! Path doesn't exist.")
+        sys.exit("File not found.")
         return
     with open(filename, mode='r') as f:
         return f.readlines()
@@ -27,11 +27,12 @@ def main():
     if len(indices) > 0:
         for i in indices:
             if args.slot:
-                print(lines[i].strip()[0:lines[i].find(':')]) # First character of the matching line == slotnumber
+                print(lines[i].split(':', 1)[0].strip()) # First character of the matching line == slotnumber
             else:
                 print(lines[i].strip())
+            sys.exit()
     else:
-        sys.exit("Could not find device-tree overlay!")
+        sys.exit("Overlay not found.")
     return
 
 
