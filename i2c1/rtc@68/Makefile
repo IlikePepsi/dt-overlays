@@ -6,7 +6,7 @@ RULESPATH = /etc/udev/rules.d
 SCRIPTPATH = /usr/src
 SERVICEPATH = /usr/lib/systemd/system
 
-# Make targets will break if there are more than one	\
+# Make targets will break if there are more than one
 # files of each type
 
 install:
@@ -33,5 +33,3 @@ uninstall:
 		sudo rm -fv $(SERVICEPATH)/$(SERVICES) ;\
 	fi
 	@echo "    ..done!"
-
-
