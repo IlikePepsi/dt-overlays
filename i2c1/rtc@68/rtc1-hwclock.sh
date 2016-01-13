@@ -5,12 +5,12 @@ SERVICE=systemd-timesyncd.service
 readonly SCRIPT_NAME=$(basename $0)
 
 log() {
-	echo "$@"
+	# echo "$@"
 	logger -p user.notice -t $SCRIPT_NAME "$@"
 }
 
 err() {
-	echo "$@" >&2
+	# echo "$@" >&2
 	logger -p user.error -t $SCRIPT_NAME "$@"
 }
 
@@ -29,6 +29,7 @@ case $1 in
 			err "hwclock not accessible.."
 			exit 1
 		fi
+		log "Starting.."
 		has_failed $(systemctl status $SERVICE | awk '/Active:[[:space:]]/ {print $2}')
 		if [ $? != 0 ]; then
 			# timesyncd is not running, read system time from hwclock
@@ -53,6 +54,7 @@ case $1 in
 			err "hwclock not accessible.."
 			exit 1
 		fi
+		log "Stopping.."
 		has_failed $(systemctl status $SERVICE | awk '/Active:[[:space:]]/ {print $2}')
 		if [ $? != 0 ]; then
 			# timesynd is not running, leave everything as it is
