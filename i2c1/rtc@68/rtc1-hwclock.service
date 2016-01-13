@@ -1,0 +1,11 @@
+[Unit]
+Description=Real time clock management
+After=systemd-timesyncd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/src/rtc1-hwclock.sh start
+ExecStop=/usr/src/rtc1-hwclock.sh stop
+
+[Install]
+WantedBy=multi-user.target
