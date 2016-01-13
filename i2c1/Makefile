@@ -6,17 +6,8 @@ VERSION = 00A0
 KEY ?= bone_capemgr.enable_partno
 UENV = /boot/uEnv.txt
 SET_UENV = ../scripts/set_uenv.py
-RM_SLOTS = ../scripts/remove_slots.py
+RM_SLOTS = ../scripts/read_slots.py
 SLOTS ?= /sys/devices/platform/bone_capemgr/slots
-
-
-define set_permission =
-@if ! [[ -e $(1) ]] ; then 			\
-	echo "File not found : $(1)" ;		\
-elif ! [[ -x $(1) ]] ; then 			\
-	sudo chmod a+x $(1) ; 			\
-fi
-endef
 
 
 define get_slotnumber =
@@ -43,7 +34,6 @@ install: build
 	@sudo cp $(BLOB) /lib/firmware
 	@echo "    ..install udev rules.."
 	@sudo cp $(RULES) /etc/udev/rules.d
-	$(call set_permission, $(SET_UENV))
 	@if [[ "$($(SET_UENV) $(UENV) --select $(KEY) 1>/dev/null)" != 0 ]] ; then \
 		$(SET_UENV) $(UENV) --select optargs --append $(KEY) &>/dev/null ; \
 	fi
@@ -53,6 +43,9 @@ install: build
 	@$(call test_slot) ; if [ $$? != 0 ] ; then 	\
 		echo $(NAME) > $(SLOTS) ;		\
 	fi
+	@echo "    ..install $(NAME) bus devices.."
+	@cd ./rtc@68 ;					\
+	make install
 	@echo "Cleaning build directory.."
 	@$(MAKE) clean
 	@echo "    ..done!"
@@ -60,6 +53,9 @@ install: build
 
 uninstall:
 	@echo "Uninstalling.."
+	@echo "    ..uninstall $(NAME) bus devices.."
+	@cd ./rtc@68 ;					\
+		make uninstall
 	@echo "    ..free overlay slot.."
 	$(eval SLOT := $(call get_slotnumber))
 	@$(call test_slot) ; if [ $$? == 0 ] ; then 	\
