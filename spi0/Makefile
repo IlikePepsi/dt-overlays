@@ -6,7 +6,7 @@ VERSION = 00A0
 KEY ?= bone_capemgr.enable_partno
 UENV = /boot/uEnv.txt
 SET_UENV = ../scripts/set_uenv.py
-RM_SLOTS = ../scripts/remove_slots.py
+RM_SLOTS = ../scripts/read_slots.py
 SLOTS ?= /sys/devices/platform/bone_capemgr/slots
 
 
