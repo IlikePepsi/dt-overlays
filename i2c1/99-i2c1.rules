@@ -1,1 +1,1 @@
-KERNEL=="rtc1", SUBSYSTEM=="rtc", DRIVER=="", ATTR{name}=="ds1307", SYMLINK="rtc", MODE="0666"
+KERNEL=="i2c-1", SUBSYSTEM=="i2c", DRIVER=="", ATTR{name}=="OMAP I2C adapter", MODE="0666"
