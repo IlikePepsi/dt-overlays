@@ -1,6 +1,6 @@
 i2c1_install:
 	@cd i2c1/ ; 	\
-	make install ;	
+	make install ;
 
 i2c1_uninstall:
 	@cd i2c1/ ;	\
