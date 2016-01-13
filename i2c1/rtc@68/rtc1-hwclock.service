@@ -4,6 +4,7 @@ After=systemd-timesyncd.service
 
 [Service]
 Type=simple
+RemainAfterExit=true
 ExecStart=/usr/src/rtc1-hwclock.sh start
 ExecStop=/usr/src/rtc1-hwclock.sh stop
 
