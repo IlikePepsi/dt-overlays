@@ -70,7 +70,6 @@ uninstall:
 		sudo rm -fv /etc/udev/rules.d/$(RULES) ;\
 	fi
 	@echo "    ..remove boot parameter.."
-	$(call set_permission, $(SET_UENV))
 	@sudo $(SET_UENV) $(UENV) --select $(KEY) --remove $(NAME) &>/dev/null
 	@echo "    ..done!"
 

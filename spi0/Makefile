@@ -10,15 +10,6 @@ RM_SLOTS = ../scripts/read_slots.py
 SLOTS ?= /sys/devices/platform/bone_capemgr/slots
 
 
-define set_permission =
-@if ! [[ -e $(1) ]] ; then 			\
-	echo "File not found : $(1)" ;		\
-elif ! [[ -x $(1) ]] ; then 			\
-	sudo chmod a+x $(1) ; 			\
-fi
-endef
-
-
 define get_slotnumber =
 -$(shell $(RM_SLOTS) $(SLOTS) $(NAME) --slot true 2>/dev/null)
 endef
@@ -43,7 +34,6 @@ install: build
 	@sudo cp $(BLOB) /lib/firmware
 	@echo "    ..install udev rules.."
 	@sudo cp $(RULES) /etc/udev/rules.d
-	$(call set_permission, $(SET_UENV))
 	@if [[ "$($(SET_UENV) $(UENV) --select $(KEY) 1>/dev/null)" != 0 ]] ; then \
 		$(SET_UENV) $(UENV) --select optargs --append $(KEY) &>/dev/null ; \
 	fi
@@ -74,7 +64,6 @@ uninstall:
 		sudo rm -fv /etc/udev/rules.d/$(RULES) ;\
 	fi
 	@echo "    ..remove boot parameter.."
-	$(call set_permission, $(SET_UENV))
 	@sudo $(SET_UENV) $(UENV) --select $(KEY) --remove $(NAME) &>/dev/null
 	@echo "    ..done!"
 
