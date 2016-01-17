@@ -22,6 +22,7 @@ has_failed() {
 	fi
 }
 
+# TODO: Check if i2c-1 realtime clock is there otherwise don't sync system and hwclock
 case $1 in
 	start)
 		hwclock -r &>/dev/null

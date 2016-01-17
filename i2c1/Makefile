@@ -34,6 +34,7 @@ install: build
 	@sudo cp $(BLOB) /lib/firmware
 	@echo "    ..install udev rules.."
 	@sudo cp $(RULES) /etc/udev/rules.d
+	@# TODO: Test if uEnv.txt exists, if not install package uboot-beaglebone
 	@if [[ "$($(SET_UENV) $(UENV) --select $(KEY) 1>/dev/null)" != 0 ]] ; then \
 		$(SET_UENV) $(UENV) --select optargs --append $(KEY) &>/dev/null ; \
 	fi
