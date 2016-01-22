@@ -29,7 +29,7 @@ build: $(SOURCE)
 
 
 install: build
-	@echo "Installing.."
+	@echo "Installing $(NAME).."
 	@echo "    ..install overlay binary.."
 	@sudo cp $(BLOB) /lib/firmware
 	@echo "    ..install udev rules.."
