@@ -11,8 +11,11 @@ SERVICEPATH = /usr/lib/systemd/system
 
 install:
 	@echo "    ..rtc@68.."
+	@echo "    ..install systemd unit.."
 	@sudo cp $(SERVICES) $(SERVICEPATH)
+	@echo "    ..install clock-updater script.."
 	@sudo cp $(SCRIPTS) $(SCRIPTPATH)
+	@echo "    ..install udev rule.."
 	@sudo cp $(RULES) $(RULESPATH)
 	@sudo systemctl daemon-reload
 	@sudo systemctl enable $(SERVICES) 1>/dev/null
