@@ -72,7 +72,7 @@
 					label = "input_P9_24";
 					debounce-interval = <50>;
 					linux,code = <24>;
-					gpios = <&gpio1 15 0X1>;
+					gpios = <&gpio0 15 0X1>;
 					gpio-key,wakeup;
 					autorepeat;
 				};
@@ -81,7 +81,7 @@
 					label = "input_P9_15";
 					debounce-interval = <50>;
 					linux,code = <15>;
-					gpios = <&gpio2 16 0x1>;
+					gpios = <&gpio1 16 0x1>;
 					gpio-key,wakeup;
 					autorepeat;
 				};
