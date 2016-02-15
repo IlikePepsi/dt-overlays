@@ -68,16 +68,7 @@
 				#address-cells = <1>;
 				#size-cells = <0>;
 
-				intput_P9_24 {
-					label = "input_P9_24";
-					debounce-interval = <50>;
-					linux,code = <24>;
-					gpios = <&gpio0 15 0X1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-
-				input_P9_15 {
+                                input_P9_15 {
 					label = "input_P9_15";
 					debounce-interval = <50>;
 					linux,code = <15>;
