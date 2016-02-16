@@ -17,14 +17,15 @@
 				pinctrl-single,pins = <
 					0x150 0x30 /* P9_22 spi0_sclk	INPUT_PULLUP | MODE0 */
 					0x154 0x30 /* P9_21 spi0_d0	INPUT_PULLUP | MODE0 */
-					/* 0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
+					
 				>;
 			};
 
 			gpio_keys: pinmux_gpio_keys {
 				pinctrl-single,pins = <
 					0x040 0x37 /* P9_15 gpio1_16 	INPUT_PULLUP | MODE7 */
-					0x184 0x37 /* P9_24 gpio0_15	INPUT_PULLUP | MODE7 */
+                                        /* 0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
+                                        /* 0x184 0x37 /* P9_24 gpio0_15	INPUT_PULLUP | MODE7 */
 				>;
 			};
 		};
