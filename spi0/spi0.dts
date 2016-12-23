@@ -16,16 +16,7 @@
 			spi0_pins: pinmux_spi0_pins {
 				pinctrl-single,pins = <
 					0x150 0x30 /* P9_22 spi0_sclk	INPUT_PULLUP | MODE0 */
-					0x154 0x30 /* P9_21 spi0_d0	INPUT_PULLUP | MODE0 */
-					
-				>;
-			};
-
-			gpio_keys: pinmux_gpio_keys {
-				pinctrl-single,pins = <
-					0x040 0x37 /* P9_15 gpio1_16 	INPUT_PULLUP | MODE7 */
-                                        /* 0x044 0x37 /* P9_23 gpio1_17	INPUT_PULLUP | MODE7 */
-                                        /* 0x184 0x37 /* P9_24 gpio0_15	INPUT_PULLUP | MODE7 */
+					0x154 0x30 /* P9_21 spi0_d0		INPUT_PULLUP | MODE0 */
 				>;
 			};
 		};
@@ -40,44 +31,6 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&spi0_pins>;
 			status = "okay";
-
-			/* additional cs channel on unused pin (GPIO bank 1, pin 17) */
-			//cs-gpios = <&gpio2 17 0>;
-
-			ads1274@0 {
-				#address-cells = <0x1>;
-				#size-celss = <0x0>;
-				modalias = "ads1274";
-				spi-max-frequency = <24000000>;
-				reg = <0>;
-				compatible = "ti,ads1274";
-			};
-		};
-	};
-
-	fragment@2 {
-		target = <&ocp>;
-
-		__overlay__ {
-			#address-cells = <1>;
-			#size-cells = <1>;
-
-			gpio_keys {
-				compatible = "gpio-keys";
-				pinctrl-names = "default";
-				pinctrl-0 = <&gpio_keys>;
-				#address-cells = <1>;
-				#size-cells = <0>;
-
-                                input_P9_15 {
-					label = "input_P9_15";
-					debounce-interval = <50>;
-					linux,code = <15>;
-					gpios = <&gpio1 16 0x1>;
-					gpio-key,wakeup;
-					autorepeat;
-				};
-			};
 		};
 	};
 };
