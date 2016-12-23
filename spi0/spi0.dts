@@ -9,6 +9,7 @@
 	part-number = "BBB-SPI0";
 	version = "00A0";
 
+	/* Create SPI pingroup with proper pinmodes */
 	fragment@0 {
 		target = <&am33xx_pinmux>;
 
@@ -22,6 +23,7 @@
 		};
 	};
 
+	/* Assign SPI pins and activate controller */
 	fragment@1 {
 		target = <&spi0>;
 
